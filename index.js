@@ -32,10 +32,36 @@ async function run(params) {
   try {
     await client.connect();
 
+    //for create a db & collection inside the mongodb
+    const db = client.db("productsDB");
+    const productsCollection = db.collection("productsCollection");
+
+    //send a user from the server to db through the thunder client (create operation)
+    app.post("/products", async (req, res) => {
+      const newProducts = req.body;
+      const result = await productsCollection.insertOne(newProducts);
+      res.send(result);
+    });
+
+    //show the all products which is send through thunder client (read operation)
+    app.get("/products", async (req, res) => {
+      const cursor = productsCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    //delete a products from the db (delete operation)
+    app.delete("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await productsCollection.deleteOne(query);
+      res.send(result);
+    });
+
     //for show ping in the server side console
     await client.db("admin").command({ ping: 1 });
     // console.log("✅ Connected successfully!");
-    console.log("❤️connected to Mongodb!")
+    console.log("❤️connected to Mongodb!");
   } finally {
   }
 }
