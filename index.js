@@ -50,6 +50,14 @@ async function run(params) {
       res.send(result);
     });
 
+    //show a single product from the db
+    app.get("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await productsCollection.findOne(query);
+      res.send(result);
+    });
+
     //update a product from the db (update operation)
     app.patch("/products/:id", async (req, res) => {
       const id = req.params.id;
