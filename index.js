@@ -50,6 +50,21 @@ async function run(params) {
       res.send(result);
     });
 
+    //update a product from the db (update operation)
+    app.patch("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedProduct = req.body;
+      const query = { _id: new ObjectId(id) };
+      const update = {
+        $set: {
+          name: updatedProduct.name,
+          price: updatedProduct.price,
+        },
+      };
+      const result = await productsCollection.updateOne(query, update);
+      res.send(result);
+    });
+
     //delete a products from the db (delete operation)
     app.delete("/products/:id", async (req, res) => {
       const id = req.params.id;
