@@ -35,7 +35,9 @@ async function run(params) {
     //for create a db & collection inside the mongodb
     const db = client.db("productsDB");
     const productsCollection = db.collection("productsCollection");
+    const bidsCollection = db.collection("bids");
 
+    // products related apis here
     //send a user from the server to db through the thunder client (create operation)
     app.post("/products", async (req, res) => {
       const newProducts = req.body;
@@ -52,26 +54,30 @@ async function run(params) {
 
     // <---------sort,limit,skip & project operation--------->
     app.get("/products", async (req, res) => {
-      console.log(req.query)
-      const email = req.query.email
-      const query = {}
-      if(email){
-        query.email = email
+      console.log(req.query);
+      const email = req.query.email;
+      const query = {};
+      if (email) {
+        query.email = email;
       }
-      console.log(query)
-      const sortFields = {price_min:1}
-      const projectFields = {title:1,price_min:1,price_max:1,email:1}
-      const cursor = productsCollection.find().sort(sortFields).skip(5).limit(10).project(projectFields);
-      
-    //   /*Note:Remember the order of sort , limit & skip:
-    //   sort-->skip-->limit*/
+      console.log(query);
+      const sortFields = { price_min: 1 };
+      const projectFields = { title: 1, price_min: 1, price_max: 1, email: 1 };
+      const cursor = productsCollection
+        .find()
+        .sort(sortFields)
+        .skip(5)
+        .limit(10)
+        .project(projectFields);
 
-    //   //for the filtering through project operation by default always give _id . If we use _id:0 then id will be not given
+      //   /*Note:Remember the order of sort , limit & skip:
+      //   sort-->skip-->limit*/
+
+      //   //for the filtering through project operation by default always give _id . If we use _id:0 then id will be not given
 
       const result = await cursor.toArray();
       res.send(result);
     });
-
 
     //<---------Query operation---------->
     // app.get("/products", async (req, res) => {
@@ -85,11 +91,11 @@ async function run(params) {
     //   const sortFields = {price_min:1}
     //   const projectFields = {title:1,price_min:1,price_max:1,email:1}
     //   const cursor = productsCollection.find(query).sort(sortFields).limit(10).project(projectFields);
-      
+
     /*Note:Remember the order of sort , limit & skip:
       sort-->skip-->limit*/
 
-      //for the filtering through project operation by default always give _id . If we use _id:0 then id will be not given
+    //for the filtering through project operation by default always give _id . If we use _id:0 then id will be not given
 
     //   const result = await cursor.toArray();
     //   res.send(result);
@@ -126,10 +132,38 @@ async function run(params) {
       res.send(result);
     });
 
+    //bids related apis here
+    app.get("/bids", async (req, res) => {
+      const email = req.query.email;
+      const query = {};
+      if (email) {
+        query.buyer_email = email;
+      }
+      const cursor = bidsCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    //get bid single item through id
+    app.get('/bids/:id',async(req,res)=>{
+      const id = req.params.id
+      const query = {_id:id}
+      const result = await bidsCollection.findOne(query)
+      res.send(result)
+
+    })
+
+    //send bid to the db 
+    app.post('/bids',async(req,res)=>{
+      const newBid = req.body
+      const result = await bidsCollection.insertOne(newBid)
+      res.send(result)
+    })
+
     //for show ping in the server side console
     await client.db("admin").command({ ping: 1 });
-    // console.log("✅ Connected successfully!");
-    console.log("❤️connected to Mongodb!");
+    // console.log("👍 Connected successfully!");
+    console.log("✅connected to Mongodb!");
   } finally {
   }
 }
