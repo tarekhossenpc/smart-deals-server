@@ -43,12 +43,57 @@ async function run(params) {
       res.send(result);
     });
 
-    //show the all products which is send through thunder client (read operation)
+    // //show the all products which is send through thunder client (read operation)
+    // app.get("/products", async (req, res) => {
+    //   const cursor = productsCollection.find();
+    //   const result = await cursor.toArray();
+    //   res.send(result);
+    // });
+
+    // <---------sort,limit,skip & project operation--------->
     app.get("/products", async (req, res) => {
-      const cursor = productsCollection.find();
+      console.log(req.query)
+      const email = req.query.email
+      const query = {}
+      if(email){
+        query.email = email
+      }
+      console.log(query)
+      const sortFields = {price_min:1}
+      const projectFields = {title:1,price_min:1,price_max:1,email:1}
+      const cursor = productsCollection.find().sort(sortFields).skip(5).limit(10).project(projectFields);
+      
+    //   /*Note:Remember the order of sort , limit & skip:
+    //   sort-->skip-->limit*/
+
+    //   //for the filtering through project operation by default always give _id . If we use _id:0 then id will be not given
+
       const result = await cursor.toArray();
       res.send(result);
     });
+
+
+    //<---------Query operation---------->
+    // app.get("/products", async (req, res) => {
+    //   console.log(req.query)
+    //   const email = req.query.email
+    //   const query = {}
+    //   if(email){
+    //     query.email = email
+    //   }
+    //   console.log(query)
+    //   const sortFields = {price_min:1}
+    //   const projectFields = {title:1,price_min:1,price_max:1,email:1}
+    //   const cursor = productsCollection.find(query).sort(sortFields).limit(10).project(projectFields);
+      
+    /*Note:Remember the order of sort , limit & skip:
+      sort-->skip-->limit*/
+
+      //for the filtering through project operation by default always give _id . If we use _id:0 then id will be not given
+
+    //   const result = await cursor.toArray();
+    //   res.send(result);
+    // });
 
     //show a single product from the db
     app.get("/products/:id", async (req, res) => {
