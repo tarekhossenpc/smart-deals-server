@@ -36,7 +36,19 @@ async function run(params) {
     const db = client.db("productsDB");
     const productsCollection = db.collection("productsCollection");
     const bidsCollection = db.collection("bids");
+    const users = db.collection("users");
 
+    app.post("/users", async (req, res) => {
+      const newUser = req.body;
+      const query = { email: newUser.email };
+      const existingUser = await users.findOne(query);
+      if (existingUser) {
+        res.send({ massage: "User already exist " });
+      } else {
+        const result = await users.insertOne(newUser);
+        res.send(result);
+      }
+    });
     // products related apis here
     //send a user from the server to db through the thunder client (create operation)
     app.post("/products", async (req, res) => {
@@ -145,20 +157,19 @@ async function run(params) {
     });
 
     //get bid single item through id
-    app.get('/bids/:id',async(req,res)=>{
-      const id = req.params.id
-      const query = {_id:id}
-      const result = await bidsCollection.findOne(query)
-      res.send(result)
+    app.get("/bids/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: id };
+      const result = await bidsCollection.findOne(query);
+      res.send(result);
+    });
 
-    })
-
-    //send bid to the db 
-    app.post('/bids',async(req,res)=>{
-      const newBid = req.body
-      const result = await bidsCollection.insertOne(newBid)
-      res.send(result)
-    })
+    //send bid to the db
+    app.post("/bids", async (req, res) => {
+      const newBid = req.body;
+      const result = await bidsCollection.insertOne(newBid);
+      res.send(result);
+    });
 
     //for show ping in the server side console
     await client.db("admin").command({ ping: 1 });
